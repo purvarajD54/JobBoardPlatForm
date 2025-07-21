@@ -210,7 +210,10 @@
     <Content Include="Views\Employer\JobDetails.cshtml" />
     <Content Include="Views\Employer\EditJob.cshtml" />
     <Content Include="Views\Employer\ShortlistedCandidates.cshtml" />
+<<<<<<< HEAD
     <Content Include="Views\JobSeeker\JobPdf.cshtml" />
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -18,8 +18,11 @@ namespace JobBoardPlatform.Models
         public bool IsApproved { get; set; }
         public int ApplicationCount { get; set; }
         public bool AlreadyApplied { get; set; }
+<<<<<<< HEAD
         public string ImagePath { get; set; }
 
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
 
     }
 }

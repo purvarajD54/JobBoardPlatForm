@@ -7,10 +7,16 @@
 
 <h2>Edit Job</h2>
 
+<<<<<<< HEAD
 @using (Html.BeginForm("Edit", "Employer", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.HiddenFor(model => model.Id)
     @Html.HiddenFor(model => model.ImagePath)
+=======
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(model => model.Id)
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
 
     <div class="form-group">
         @Html.LabelFor(model => model.Title)
@@ -32,6 +38,7 @@
         @Html.TextBoxFor(model => model.Location, new { @class = "form-control" })
     </div>
 
+<<<<<<< HEAD
     <div class="form-group">
         @Html.Label("Current Image")
         @if (!string.IsNullOrEmpty(Model.ImagePath))
@@ -46,6 +53,8 @@
         <input type="file" name="ImageFile" class="form-control" />
     </div>
 
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
     <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
     <a href="@Url.Action("Dashboard", "Employer")" class="btn btn-secondary mt-3">Cancel</a>
 }
