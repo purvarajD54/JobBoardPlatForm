@@ -9,35 +9,69 @@ public class AdminController : Controller
 {
     string conStr = ConfigurationManager.ConnectionStrings["JobBoardDB"].ConnectionString;
 
+    // ✅ 1. Admin Dashboard - Show Unapproved Jobs
     public ActionResult Dashboard()
     {
         if (Session["UserRole"]?.ToString() != "Admin")
             return RedirectToAction("Login", "Account");
 
-        List<Job> jobs = new List<Job>();
+        var model = new AdminDashboardViewModel();
+        model.PendingJobs = new List<Job>();
+
         using (SqlConnection con = new SqlConnection(conStr))
         {
-            string query = "SELECT J.*, U.Name as EmployerName FROM Jobs J JOIN Users U ON J.PostedBy = U.Id WHERE IsApproved = 0";
-            SqlCommand cmd = new SqlCommand(query, con);
             con.Open();
-            SqlDataReader dr = cmd.ExecuteReader();
-            while (dr.Read())
+
+            // Total Jobs
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Jobs", con))
+                model.TotalJobs = (int)cmd.ExecuteScalar();
+
+            // Pending Jobs Count
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Jobs WHERE IsApproved = 0", con))
+                model.PendingJobsCount = (int)cmd.ExecuteScalar();
+
+            // Total Applications
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Applications", con))
+                model.TotalApplications = (int)cmd.ExecuteScalar();
+
+            // Approved Applications
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Applications WHERE Status = 'Approved'", con))
+                model.ApprovedApplications = (int)cmd.ExecuteScalar();
+
+            // Rejected Applications
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Applications WHERE Status = 'Rejected'", con))
+                model.RejectedApplications = (int)cmd.ExecuteScalar();
+
+            // Total Employers
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Role = 'Employer'", con))
+                model.TotalEmployers = (int)cmd.ExecuteScalar();
+
+            // List of Pending Jobs
+            using (SqlCommand cmd = new SqlCommand("SELECT * FROM Jobs WHERE IsApproved = 0", con))
             {
-                jobs.Add(new Job
+                using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    Id = (int)dr["Id"],
-                    Title = dr["Title"].ToString(),
-                    Description = dr["Description"].ToString(),
-                    Category = dr["Category"].ToString(),
-                    Location = dr["Location"].ToString(),
-                    PostedDate = (DateTime)dr["PostedDate"],
-                    PostedByName = dr["EmployerName"].ToString()
-                });
+                    while (reader.Read())
+                    {
+                        model.PendingJobs.Add(new Job
+                        {
+                            Id = Convert.ToInt32(reader["Id"]),
+                            Title = reader["Title"].ToString(),
+                            Description = reader["Description"].ToString(),
+                            PostedDate = Convert.ToDateTime(reader["PostedDate"])
+                        });
+                    }
+                }
             }
         }
-        return View(jobs);
+
+        return View(model);
     }
 
+
+
+
+    // ✅ 2. Approve Job
     public ActionResult Approve(int id)
     {
         using (SqlConnection con = new SqlConnection(conStr))
@@ -51,6 +85,7 @@ public class AdminController : Controller
         return RedirectToAction("Dashboard");
     }
 
+    // ✅ 3. Reject Job
     public ActionResult Reject(int id)
     {
         using (SqlConnection con = new SqlConnection(conStr))
@@ -64,10 +99,10 @@ public class AdminController : Controller
         return RedirectToAction("Dashboard");
     }
 
+    // ✅ 4. View New Applications Only (Status = Applied)
     public ActionResult Applications()
     {
         List<Application> apps = new List<Application>();
-
         using (SqlConnection con = new SqlConnection(conStr))
         {
             string query = @"SELECT A.Id, A.AppliedDate, A.Status, A.ResumePath, 
@@ -76,7 +111,7 @@ public class AdminController : Controller
                              JOIN Jobs J ON A.JobId = J.Id
                              JOIN Users U ON A.UserId = U.Id
                              JOIN Users E ON J.PostedBy = E.Id
-                             WHERE A.Status = 'Applied'"; // ✅ Filter only new apps
+                             WHERE A.Status = 'Applied'";
 
             SqlCommand cmd = new SqlCommand(query, con);
             con.Open();
@@ -96,13 +131,13 @@ public class AdminController : Controller
             }
         }
 
-        return View(apps); // Applications.cshtml
+        return View(apps); // View: Views/Admin/Applications.cshtml
     }
 
+    // ✅ 5. View All Applications (No filter)
     public ActionResult ViewApplications()
     {
         List<Application> apps = new List<Application>();
-
         using (SqlConnection con = new SqlConnection(conStr))
         {
             string query = @"
@@ -133,6 +168,7 @@ public class AdminController : Controller
             }
         }
 
-        return View(apps); // ViewApplications.cshtml
+        return View(apps); // View: Views/Admin/ViewApplications.cshtml
     }
+
 }
