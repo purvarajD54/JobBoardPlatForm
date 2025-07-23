@@ -24,7 +24,10 @@ public class AdminController : Controller
 
         using (SqlConnection con = new SqlConnection(conStr))
         {
+<<<<<<< HEAD
 
+=======
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
             con.Open();
 
             // Total Jobs
@@ -108,7 +111,6 @@ public class AdminController : Controller
     public ActionResult Applications()
     {
         List<Application> apps = new List<Application>();
-
         using (SqlConnection con = new SqlConnection(conStr))
         {
             string query = @"SELECT A.Id, A.AppliedDate, A.Status, A.ResumePath, 
@@ -144,7 +146,6 @@ public class AdminController : Controller
     public ActionResult ViewApplications()
     {
         List<Application> apps = new List<Application>();
-
         using (SqlConnection con = new SqlConnection(conStr))
         {
             string query = @"
@@ -177,6 +178,7 @@ public class AdminController : Controller
 
         return View(apps); // View: Views/Admin/ViewApplications.cshtml
     }
+<<<<<<< HEAD
     public ActionResult DownloadJobsExcel()
     {
         List<Job> jobs = new List<Job>();
@@ -308,5 +310,7 @@ public class AdminController : Controller
         }
     }
 
+=======
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 
 }

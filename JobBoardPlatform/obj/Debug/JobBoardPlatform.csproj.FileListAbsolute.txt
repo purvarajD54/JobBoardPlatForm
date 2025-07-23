@@ -236,6 +236,7 @@ C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm-main(1)\JobBoardPlatform
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm-main(1)\JobBoardPlatform\obj\Debug\JobBoardPlatform.dll
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm-main(1)\JobBoardPlatform\obj\Debug\JobBoardPlatform.pdb
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm-main\JobBoardPlatform\bin\Rotativa.dll
+<<<<<<< HEAD
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin\JobBoardPlatform.dll.config
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin\JobBoardPlatform.dll
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin\JobBoardPlatform.pdb
@@ -323,3 +324,5 @@ C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin\System.ComponentModel.Annotations.dll
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin\EPPlus.xml
 C:\Users\Purvarajsinh\OneDrive\Desktop\JobBoardPlatForm (1)\JobBoardPlatform\bin\Microsoft.IO.RecyclableMemoryStream.xml
+=======
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35

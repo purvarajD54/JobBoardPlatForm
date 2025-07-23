@@ -55,10 +55,13 @@
       <HintPath>..\packages\EPPlus.System.Drawing.6.1.1\lib\net462\EPPlus.System.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+<<<<<<< HEAD
     <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.4.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.4.1\lib\net46\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
+=======
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
     <Reference Include="Rotativa, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Rotativa.1.7.3\lib\net461\Rotativa.dll</HintPath>
     </Reference>
@@ -229,7 +232,14 @@
     <Content Include="Views\Employer\JobDetails.cshtml" />
     <Content Include="Views\Employer\EditJob.cshtml" />
     <Content Include="Views\Employer\ShortlistedCandidates.cshtml" />
+<<<<<<< HEAD
     <Content Include="Views\JobSeeker\JobPdf.cshtml" />
+=======
+<<<<<<< HEAD
+    <Content Include="Views\JobSeeker\JobPdf.cshtml" />
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -7,10 +7,22 @@
 
 <h2>Edit Job</h2>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 @using (Html.BeginForm("Edit", "Employer", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.HiddenFor(model => model.Id)
     @Html.HiddenFor(model => model.ImagePath)
+<<<<<<< HEAD
+=======
+=======
+@using (Html.BeginForm())
+{
+    @Html.HiddenFor(model => model.Id)
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 
     <div class="form-group">
         @Html.LabelFor(model => model.Title)
@@ -32,6 +44,10 @@
         @Html.TextBoxFor(model => model.Location, new { @class = "form-control" })
     </div>
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
     <div class="form-group">
         @Html.Label("Current Image")
         @if (!string.IsNullOrEmpty(Model.ImagePath))
@@ -46,6 +62,11 @@
         <input type="file" name="ImageFile" class="form-control" />
     </div>
 
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
     <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
     <a href="@Url.Action("Dashboard", "Employer")" class="btn btn-secondary mt-3">Cancel</a>
 }

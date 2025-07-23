@@ -1,5 +1,17 @@
+<<<<<<< HEAD
 ﻿using JobBoardPlatform.Models;
 using OfficeOpenXml;
+=======
+<<<<<<< HEAD
+﻿using JobBoardPlatform.Models;
+=======
+﻿// ===============================
+// EmployerController.cs (Updated)
+// ===============================
+
+using JobBoardPlatform.Models;
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -22,12 +34,27 @@ public class EmployerController : Controller
 
         using (SqlConnection con = new SqlConnection(conStr))
         {
+<<<<<<< HEAD
 
             con.Open();
 
             string jobQuery = @"SELECT * FROM Jobs 
                                 WHERE PostedBy=@PostedBy
                                 AND (Title LIKE @Search OR Category LIKE @Search)";
+=======
+            con.Open();
+
+<<<<<<< HEAD
+            string jobQuery = @"SELECT * FROM Jobs 
+                                WHERE PostedBy=@PostedBy
+                                AND (Title LIKE @Search OR Category LIKE @Search)";
+=======
+            // 1️⃣ Load jobs for employer with optional search filter
+            string jobQuery = @"SELECT * FROM Jobs 
+                            WHERE PostedBy=@PostedBy
+                            AND (Title LIKE @Search OR Category LIKE @Search)";
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
             SqlCommand jobCmd = new SqlCommand(jobQuery, con);
             jobCmd.Parameters.AddWithValue("@PostedBy", empId);
             jobCmd.Parameters.AddWithValue("@Search", $"%{searchTerm}%");
@@ -48,12 +75,26 @@ public class EmployerController : Controller
                     Location = dr["Location"].ToString(),
                     PostedDate = (DateTime)dr["PostedDate"],
                     IsApproved = isApproved,
+<<<<<<< HEAD
                     ImagePath = dr["ImagePath"]?.ToString(),
+=======
+<<<<<<< HEAD
+                    ImagePath = dr["ImagePath"]?.ToString(),
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
                     ApplicationCount = 0
                 });
             }
             dr.Close();
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+            // 2️⃣ Application count per job
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
             foreach (var job in jobs)
             {
                 string countQuery = "SELECT COUNT(*) FROM Applications WHERE JobId = @JobId";
@@ -62,11 +103,26 @@ public class EmployerController : Controller
                 job.ApplicationCount = (int)countCmd.ExecuteScalar();
             }
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
             string statQuery = @"SELECT Status, COUNT(*) AS Count
                                  FROM Applications A
                                  JOIN Jobs J ON A.JobId = J.Id
                                  WHERE J.PostedBy = @PostedBy
                                  GROUP BY Status";
+<<<<<<< HEAD
+=======
+=======
+            // 3️⃣ Total/pending/approved/rejected applications
+            string statQuery = @"SELECT Status, COUNT(*) AS Count
+                             FROM Applications A
+                             JOIN Jobs J ON A.JobId = J.Id
+                             WHERE J.PostedBy = @PostedBy
+                             GROUP BY Status";
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 
             SqlCommand statCmd = new SqlCommand(statQuery, con);
             statCmd.Parameters.AddWithValue("@PostedBy", empId);
@@ -94,6 +150,13 @@ public class EmployerController : Controller
 
         return View(jobs);
     }
+
+
+
+
+
+
+
 
     public ActionResult CreateJob() => View();
 
@@ -142,7 +205,156 @@ public class EmployerController : Controller
         return RedirectToAction("Dashboard");
     }
 
+<<<<<<< HEAD
     public ActionResult EditJob(int id)
+=======
+<<<<<<< HEAD
+=======
+    // GET: Employer/EditJob/5
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+    public ActionResult EditJob(int id)
+    {
+        Job job = new Job();
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "SELECT * FROM Jobs WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                job.Id = (int)dr["Id"];
+                job.Title = dr["Title"].ToString();
+                job.Description = dr["Description"].ToString();
+                job.Category = dr["Category"].ToString();
+                job.Location = dr["Location"].ToString();
+<<<<<<< HEAD
+                job.ImagePath = dr["ImagePath"]?.ToString();
+=======
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+            }
+        }
+
+        return View(job);
+    }
+
+<<<<<<< HEAD
+
+    [HttpPost]
+    public ActionResult Edit(Job job, HttpPostedFileBase ImageFile)
+    {
+        if (ModelState.IsValid)
+        {
+            using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["JobBoardDB"].ConnectionString))
+            {
+                con.Open();
+
+                string imagePath = job.ImagePath; // default = old image path
+
+                if (ImageFile != null && ImageFile.ContentLength > 0)
+                {
+                    string fileName = Path.GetFileName(ImageFile.FileName);
+                    string imageFolder = "~/Uploads/";
+                    string physicalPath = Server.MapPath(imageFolder + fileName);
+                    ImageFile.SaveAs(physicalPath);
+                    imagePath = imageFolder + fileName;
+                }
+
+                string query = "UPDATE Jobs SET Title=@Title, Description=@Description, Category=@Category, Location=@Location, ImagePath=@ImagePath WHERE Id=@Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Title", job.Title);
+                cmd.Parameters.AddWithValue("@Description", job.Description);
+                cmd.Parameters.AddWithValue("@Category", job.Category);
+                cmd.Parameters.AddWithValue("@Location", job.Location);
+                cmd.Parameters.AddWithValue("@ImagePath", imagePath);
+                cmd.Parameters.AddWithValue("@Id", job.Id);
+                cmd.ExecuteNonQuery();
+            }
+
+            return RedirectToAction("Dashboard", "Employer");
+        }
+
+        return View(job);
+    }
+
+
+    public ActionResult JobDetails(int id)
+    {
+        Job job = null;
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "SELECT * FROM Jobs WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                job = new Job
+                {
+                    Id = (int)dr["Id"],
+                    Title = dr["Title"].ToString(),
+                    Description = dr["Description"].ToString(),
+                    Category = dr["Category"].ToString(),
+                    Location = dr["Location"].ToString(),
+                    PostedDate = (DateTime)dr["PostedDate"],
+                    IsApproved = (bool)dr["IsApproved"],
+                    ImagePath = dr["ImagePath"]?.ToString()
+                };
+            }
+        }
+
+        if (job == null)
+            return HttpNotFound();
+
+        return View(job);
+    }
+
+    public ActionResult DeleteJob(int id)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "DELETE FROM Jobs WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+=======
+    // POST: Employer/EditJob/5
+    [HttpPost]
+    public ActionResult EditJob(Job job)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = @"UPDATE Jobs 
+                         SET Title = @Title, Description = @Description, Category = @Category, Location = @Location 
+                         WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Title", job.Title);
+            cmd.Parameters.AddWithValue("@Description", job.Description);
+            cmd.Parameters.AddWithValue("@Category", job.Category);
+            cmd.Parameters.AddWithValue("@Location", job.Location);
+            cmd.Parameters.AddWithValue("@Id", job.Id);
+
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+
+<<<<<<< HEAD
+        TempData["SuccessMessage"] = "Job deleted successfully!";
+        return RedirectToAction("Dashboard");
+    }
+
+=======
+        return RedirectToAction("Dashboard");
+    }
+
+
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+    public ActionResult ViewApplications(int id, string searchTerm, string statusFilter)
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
     {
         Job job = new Job();
 
@@ -272,12 +484,32 @@ public class EmployerController : Controller
                 query += " AND (U.Name LIKE @Search OR J.Title LIKE @Search)";
             if (!string.IsNullOrEmpty(statusFilter))
                 query += " AND A.Status = @StatusFilter";
+<<<<<<< HEAD
+=======
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                query += " AND (U.Name LIKE @Search OR J.Title LIKE @Search)";
+            }
+
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                query += " AND A.Status = @StatusFilter";
+            }
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 
             SqlCommand cmd = new SqlCommand(query, con);
             cmd.Parameters.AddWithValue("@JobId", id);
 
             if (!string.IsNullOrEmpty(searchTerm))
                 cmd.Parameters.AddWithValue("@Search", "%" + searchTerm + "%");
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
             if (!string.IsNullOrEmpty(statusFilter))
                 cmd.Parameters.AddWithValue("@StatusFilter", statusFilter);
 
@@ -302,6 +534,7 @@ public class EmployerController : Controller
         return View(applications);
     }
 
+<<<<<<< HEAD
     public ActionResult ApproveApplication(int id, int jobId)
     {
         using (SqlConnection con = new SqlConnection(conStr))
@@ -328,6 +561,115 @@ public class EmployerController : Controller
         return RedirectToAction("ViewApplications", new { id = jobId });
     }
 
+=======
+<<<<<<< HEAD
+    public ActionResult ApproveApplication(int id, int jobId)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "UPDATE Applications SET Status = 'Approved' WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+        return RedirectToAction("ViewApplications", new { id = jobId });
+    }
+
+    public ActionResult RejectApplication(int id, int jobId)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "UPDATE Applications SET Status = 'Rejected' WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+        return RedirectToAction("ViewApplications", new { id = jobId });
+    }
+
+=======
+
+
+    public ActionResult ApproveApplication(int id, int jobId)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "UPDATE Applications SET Status = 'Approved' WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+        return RedirectToAction("ViewApplications", new { id = jobId });
+
+    }
+
+    public ActionResult RejectApplication(int id, int jobId)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "UPDATE Applications SET Status = 'Rejected' WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+        return RedirectToAction("ViewApplications", new { id = jobId });
+
+    }
+
+
+    public ActionResult JobDetails(int id)
+    {
+        Job job = null;
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "SELECT * FROM Jobs WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+            if (dr.Read())
+            {
+                job = new Job
+                {
+                    Id = (int)dr["Id"],
+                    Title = dr["Title"].ToString(),
+                    Description = dr["Description"].ToString(),
+                    Category = dr["Category"].ToString(),
+                    Location = dr["Location"].ToString(),
+                    PostedDate = (DateTime)dr["PostedDate"],
+                    IsApproved = (bool)dr["IsApproved"]
+                };
+            }
+        }
+
+        if (job == null)
+            return HttpNotFound();
+
+        return View(job);
+    }
+
+    public ActionResult DeleteJob(int id)
+    {
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "DELETE FROM Jobs WHERE Id = @Id";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Id", id);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
+
+        TempData["SuccessMessage"] = "Job deleted successfully!";
+        return RedirectToAction("Dashboard");
+    }
+
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
     public ActionResult ShortlistedCandidates(string searchTerm = "")
     {
         int empId = Convert.ToInt32(Session["UserId"]);
@@ -336,12 +678,27 @@ public class EmployerController : Controller
         using (SqlConnection con = new SqlConnection(conStr))
         {
             string query = @"
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
                 SELECT A.*, U.Name AS CandidateName, J.Title AS JobTitle
                 FROM Applications A
                 JOIN Users U ON A.UserId = U.Id
                 JOIN Jobs J ON A.JobId = J.Id
                 WHERE A.Status = 'Approved' AND J.PostedBy = @PostedBy
                   AND (U.Name LIKE @Search OR J.Title LIKE @Search)";
+<<<<<<< HEAD
+=======
+=======
+            SELECT A.*, U.Name AS CandidateName, J.Title AS JobTitle
+            FROM Applications A
+            JOIN Users U ON A.UserId = U.Id
+            JOIN Jobs J ON A.JobId = J.Id
+            WHERE A.Status = 'Approved' AND J.PostedBy = @PostedBy
+              AND (U.Name LIKE @Search OR J.Title LIKE @Search)";
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 
             SqlCommand cmd = new SqlCommand(query, con);
             cmd.Parameters.AddWithValue("@PostedBy", empId);
@@ -368,6 +725,7 @@ public class EmployerController : Controller
         ViewBag.SearchTerm = searchTerm;
         return View(applications);
     }
+<<<<<<< HEAD
     [HttpGet]
     public ActionResult DownloadJobApplicationsExcel(int jobId)
     {
@@ -584,4 +942,16 @@ public class EmployerController : Controller
     }
 
 
+=======
+<<<<<<< HEAD
+=======
+
+
+
+
+
+
+
+>>>>>>> d2359dde51dcf066c3b29c5bd103a375913dd5d1
+>>>>>>> f5518f85fefe67dfd304f3ee1ca70b1cf1e24a35
 }
