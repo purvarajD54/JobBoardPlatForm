@@ -1,43 +1,82 @@
 ﻿using JobBoardPlatform.Models;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Web.Mvc;
+using System.Drawing;
+using System.IO;
 
 public class AdminController : Controller
 {
     string conStr = ConfigurationManager.ConnectionStrings["JobBoardDB"].ConnectionString;
 
+    // ✅ 1. Admin Dashboard - Show Unapproved Jobs
     public ActionResult Dashboard()
     {
         if (Session["UserRole"]?.ToString() != "Admin")
             return RedirectToAction("Login", "Account");
 
-        List<Job> jobs = new List<Job>();
+        var model = new AdminDashboardViewModel();
+        model.PendingJobs = new List<Job>();
+
         using (SqlConnection con = new SqlConnection(conStr))
         {
-            string query = "SELECT J.*, U.Name as EmployerName FROM Jobs J JOIN Users U ON J.PostedBy = U.Id WHERE IsApproved = 0";
-            SqlCommand cmd = new SqlCommand(query, con);
+
             con.Open();
-            SqlDataReader dr = cmd.ExecuteReader();
-            while (dr.Read())
+
+            // Total Jobs
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Jobs", con))
+                model.TotalJobs = (int)cmd.ExecuteScalar();
+
+            // Pending Jobs Count
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Jobs WHERE IsApproved = 0", con))
+                model.PendingJobsCount = (int)cmd.ExecuteScalar();
+
+            // Total Applications
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Applications", con))
+                model.TotalApplications = (int)cmd.ExecuteScalar();
+
+            // Approved Applications
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Applications WHERE Status = 'Approved'", con))
+                model.ApprovedApplications = (int)cmd.ExecuteScalar();
+
+            // Rejected Applications
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Applications WHERE Status = 'Rejected'", con))
+                model.RejectedApplications = (int)cmd.ExecuteScalar();
+
+            // Total Employers
+            using (SqlCommand cmd = new SqlCommand("SELECT COUNT(*) FROM Users WHERE Role = 'Employer'", con))
+                model.TotalEmployers = (int)cmd.ExecuteScalar();
+
+            // List of Pending Jobs
+            using (SqlCommand cmd = new SqlCommand("SELECT * FROM Jobs WHERE IsApproved = 0", con))
             {
-                jobs.Add(new Job
+                using (SqlDataReader reader = cmd.ExecuteReader())
                 {
-                    Id = (int)dr["Id"],
-                    Title = dr["Title"].ToString(),
-                    Description = dr["Description"].ToString(),
-                    Category = dr["Category"].ToString(),
-                    Location = dr["Location"].ToString(),
-                    PostedDate = (DateTime)dr["PostedDate"],
-                    PostedByName = dr["EmployerName"].ToString()
-                });
+                    while (reader.Read())
+                    {
+                        model.PendingJobs.Add(new Job
+                        {
+                            Id = Convert.ToInt32(reader["Id"]),
+                            Title = reader["Title"].ToString(),
+                            Description = reader["Description"].ToString(),
+                            PostedDate = Convert.ToDateTime(reader["PostedDate"])
+                        });
+                    }
+                }
             }
         }
-        return View(jobs);
+
+        return View(model);
     }
 
+
+
+
+    // ✅ 2. Approve Job
     public ActionResult Approve(int id)
     {
         using (SqlConnection con = new SqlConnection(conStr))
@@ -51,6 +90,7 @@ public class AdminController : Controller
         return RedirectToAction("Dashboard");
     }
 
+    // ✅ 3. Reject Job
     public ActionResult Reject(int id)
     {
         using (SqlConnection con = new SqlConnection(conStr))
@@ -64,6 +104,7 @@ public class AdminController : Controller
         return RedirectToAction("Dashboard");
     }
 
+    // ✅ 4. View New Applications Only (Status = Applied)
     public ActionResult Applications()
     {
         List<Application> apps = new List<Application>();
@@ -76,7 +117,7 @@ public class AdminController : Controller
                              JOIN Jobs J ON A.JobId = J.Id
                              JOIN Users U ON A.UserId = U.Id
                              JOIN Users E ON J.PostedBy = E.Id
-                             WHERE A.Status = 'Applied'"; // ✅ Filter only new apps
+                             WHERE A.Status = 'Applied'";
 
             SqlCommand cmd = new SqlCommand(query, con);
             con.Open();
@@ -96,9 +137,10 @@ public class AdminController : Controller
             }
         }
 
-        return View(apps); // Applications.cshtml
+        return View(apps); // View: Views/Admin/Applications.cshtml
     }
 
+    // ✅ 5. View All Applications (No filter)
     public ActionResult ViewApplications()
     {
         List<Application> apps = new List<Application>();
@@ -133,6 +175,138 @@ public class AdminController : Controller
             }
         }
 
-        return View(apps); // ViewApplications.cshtml
+        return View(apps); // View: Views/Admin/ViewApplications.cshtml
     }
+    public ActionResult DownloadJobsExcel()
+    {
+        List<Job> jobs = new List<Job>();
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = "SELECT * FROM Jobs WHERE IsApproved = 1";
+            SqlCommand cmd = new SqlCommand(query, con);
+            con.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                jobs.Add(new Job
+                {
+                    Title = dr["Title"].ToString(),
+                    Category = dr["Category"].ToString(),
+                    Location = dr["Location"].ToString(),
+                    Description = dr["Description"].ToString(),
+                    PostedDate = Convert.ToDateTime(dr["PostedDate"])
+                });
+            }
+        }
+
+        // ✅ Set EPPlus license context for v7
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+        using (ExcelPackage package = new ExcelPackage())
+        {
+            var ws = package.Workbook.Worksheets.Add("Jobs");
+
+            // Header row
+            ws.Cells[1, 1].Value = "Title";
+            ws.Cells[1, 2].Value = "Category";
+            ws.Cells[1, 3].Value = "Location";
+            ws.Cells[1, 4].Value = "Description";
+            ws.Cells[1, 5].Value = "Posted Date";
+
+            using (var range = ws.Cells[1, 1, 1, 5])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+            }
+
+            // Data rows
+            for (int i = 0; i < jobs.Count; i++)
+            {
+                var job = jobs[i];
+                ws.Cells[i + 2, 1].Value = job.Title;
+                ws.Cells[i + 2, 2].Value = job.Category;
+                ws.Cells[i + 2, 3].Value = job.Location;
+                ws.Cells[i + 2, 4].Value = job.Description;
+                ws.Cells[i + 2, 5].Value = job.PostedDate.ToString("dd-MM-yyyy");
+            }
+
+            ws.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AllJobs.xlsx");
+        }
+    }
+
+    public ActionResult DownloadApplicationsExcel()
+    {
+        List<dynamic> applications = new List<dynamic>();
+
+        using (SqlConnection con = new SqlConnection(conStr))
+        {
+            string query = @"
+            SELECT A.Id, J.Title AS JobTitle, U.Name AS CandidateName, A.AppliedDate, A.Status
+            FROM Applications A
+            JOIN Jobs J ON A.JobId = J.Id
+            JOIN Users U ON A.UserId = U.Id";
+
+            SqlCommand cmd = new SqlCommand(query, con);
+            con.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+
+            while (dr.Read())
+            {
+                applications.Add(new
+                {
+                    Id = Convert.ToInt32(dr["Id"]),
+                    JobTitle = dr["JobTitle"].ToString(),
+                    CandidateName = dr["CandidateName"].ToString(),
+                    AppliedDate = Convert.ToDateTime(dr["AppliedDate"]),
+                    Status = dr["Status"].ToString()
+                });
+            }
+        }
+
+        // ✅ Set EPPlus license context
+        ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+        using (ExcelPackage package = new ExcelPackage())
+        {
+            var ws = package.Workbook.Worksheets.Add("Applications");
+
+            // Header
+            ws.Cells[1, 1].Value = "Application ID";
+            ws.Cells[1, 2].Value = "Job Title";
+            ws.Cells[1, 3].Value = "Candidate Name";
+            ws.Cells[1, 4].Value = "Applied Date";
+            ws.Cells[1, 5].Value = "Status";
+
+            using (var range = ws.Cells[1, 1, 1, 5])
+            {
+                range.Style.Font.Bold = true;
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(Color.LightGray);
+            }
+
+            // Data
+            for (int i = 0; i < applications.Count; i++)
+            {
+                var app = applications[i];
+                ws.Cells[i + 2, 1].Value = app.Id;
+                ws.Cells[i + 2, 2].Value = app.JobTitle;
+                ws.Cells[i + 2, 3].Value = app.CandidateName;
+                ws.Cells[i + 2, 4].Value = app.AppliedDate.ToString("dd-MM-yyyy");
+                ws.Cells[i + 2, 5].Value = app.Status;
+            }
+
+            ws.Cells.AutoFitColumns();
+
+            var fileBytes = package.GetAsByteArray();
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "AllApplications.xlsx");
+        }
+    }
+
+
 }

@@ -1,13 +1,12 @@
-@model List<JobBoardPlatform.Models.Application>
+﻿@model List<JobBoardPlatform.Models.Application>
 
 @{
-    ViewBag.Title = "All Applications";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "All Job Applications";
 }
 
-<h2>All Applications</h2>
+<h2>All Job Applications</h2>
 
-<table class="table table-bordered">
+<table class="table table-bordered table-striped">
     <thead>
         <tr>
             <th>Candidate</th>
@@ -25,11 +24,20 @@
                 <td>@app.CandidateName</td>
                 <td>@app.JobTitle</td>
                 <td>@app.EmployerName</td>
-                <td>@app.AppliedDate.ToShortDateString()</td>
+                <td>@app.AppliedDate.ToString("dd-MM-yyyy")</td>
                 <td>
-                    <span class="badge @(app.Status == "Approved" ? "bg-success" : app.Status == "Rejected" ? "bg-danger" : "bg-secondary")">
-                        @app.Status
-                    </span>
+                    @if (app.Status == "Applied")
+                    {
+                        <span class="badge badge-warning">Applied</span>
+                    }
+                    else if (app.Status == "Approved")
+                    {
+                        <span class="badge badge-success">Approved</span>
+                    }
+                    else if (app.Status == "Rejected")
+                    {
+                        <span class="badge badge-danger">Rejected</span>
+                    }
                 </td>
                 <td>
                     @if (!string.IsNullOrEmpty(app.ResumePath))
@@ -45,3 +53,6 @@
         }
     </tbody>
 </table>
+<a href="@Url.Action("DownloadApplicationsExcel", "Admin")" class="btn btn-info">
+    📥 Download All Applications (Excel)
+</a>
