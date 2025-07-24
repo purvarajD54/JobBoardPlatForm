@@ -1,0 +1,59 @@
+﻿@model List<JobBoardPlatform.Models.Application>
+
+@{
+    ViewBag.Title = "Shortlisted Candidates";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2 class="mb-4">Shortlisted Candidates</h2>
+
+<!-- 🔍 Search Bar -->
+<form method="get" class="form-inline mb-3">
+    <input type="text" name="searchTerm" class="form-control mr-2" placeholder="Search by candidate/job title" value="@ViewBag.SearchTerm" />
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th>Candidate</th>
+                <th>Job Title</th>
+                <th>Applied Date</th>
+                <th>Resume</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var app in Model)
+            {
+                <tr>
+                    <td>@app.CandidateName</td>
+                    <td>@app.JobTitle</td>
+                    <td>@app.AppliedDate.ToShortDateString()</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(app.ResumePath))
+                        {
+                            <a href="@Url.Content(app.ResumePath)" class="btn btn-sm btn-success" download>Download</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No Resume</span>
+                        }
+                    </td>
+                    <td>
+                        <span class="badge badge-success">Approved</span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">No shortlisted candidates yet.</div>
+}
+<a href="@Url.Action("DownloadShortlistedApplicationsExcel", "Employer")" class="btn btn-success mb-3">
+    Download Excel
+</a>
